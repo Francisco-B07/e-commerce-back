@@ -1,11 +1,8 @@
+import type { NextApiRequest, NextApiResponse } from "next";
 import methods from "micro-method-router";
 
-module.exports = methods({
-  async post(req, res) {
-    return handler(req, res);
+export default methods({
+  async post(req: NextApiRequest, res: NextApiResponse) {
+    res.status(200).send("ok");
   },
 });
-
-function handler(req, res) {
-  res.status(200).send("Status: OK");
-}
