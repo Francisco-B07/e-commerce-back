@@ -130,6 +130,11 @@ loose-envify@^1.1.0:
   dependencies:
     js-tokens "^3.0.0 || ^4.0.0"
 
+micro-method-router@^0.1.0:
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/micro-method-router/-/micro-method-router-0.1.0.tgz#d51d905e8117ce219e847bee505721a46a30ab2f"
+  integrity sha512-okI4LwG9GjSMuLLi+O8ww1sgTklEidLBIBZePfMjtHVUa8adeoImEijc/ddjm3hFvUGzXa+GETzpWquIE01aDQ==
+
 nanoid@^3.3.4:
   version "3.3.4"
   resolved "https://registry.yarnpkg.com/nanoid/-/nanoid-3.3.4.tgz#730b67e3cd09e2deacf03c027c81c9d9dbc5e8ab"
