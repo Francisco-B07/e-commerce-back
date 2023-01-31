@@ -2,8 +2,34 @@ import { NextApiRequest, NextApiResponse } from "next";
 import parseToken from "parse-bearer-token";
 import { decode } from "lib/jwt";
 
+// ------FUNCIONES PARA VALIDAR BODY Y QUERY------
+async function bodyValidate(
+  req: NextApiRequest,
+  res: NextApiResponse,
+  bodySchema
+) {
+  try {
+    await bodySchema.validate(req.body);
+  } catch (e) {
+    res.status(400).json({ field: "body", message: e });
+  }
+}
+
+async function queryValidate(
+  req: NextApiRequest,
+  res: NextApiResponse,
+  querySchema
+) {
+  try {
+    await querySchema.validate(req.query);
+  } catch (e) {
+    res.status(400).json({ field: "query", message: e });
+  }
+}
+// ----------------------------------------------------------
+
 export function authMiddleware(callback) {
-  return function (req: NextApiRequest, res: NextApiResponse) {
+  return async function (req: NextApiRequest, res: NextApiResponse) {
     const token = parseToken(req);
     if (!token) {
       res.status(401).send({ message: "no hay Token" });
@@ -14,5 +40,26 @@ export function authMiddleware(callback) {
     } else {
       res.status(401).send({ message: "Token incorrecto" });
     }
+  };
+}
+
+export function schemaMiddleware(querySchema, bodySchema, callback) {
+  return async function (req: NextApiRequest, res: NextApiResponse) {
+    await queryValidate(req, res, querySchema);
+    await bodyValidate(req, res, bodySchema);
+    callback(req, res);
+  };
+}
+
+export function bodySchemaMiddleware(bodySchema, callback) {
+  return async function (req: NextApiRequest, res: NextApiResponse) {
+    await bodyValidate(req, res, bodySchema);
+    callback(req, res);
+  };
+}
+export function querySchemaMiddleware(querySchema, callback) {
+  return async function (req: NextApiRequest, res: NextApiResponse) {
+    await queryValidate(req, res, querySchema);
+    callback(req, res);
   };
 }

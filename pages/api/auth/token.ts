@@ -1,23 +1,31 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { generate } from "lib/jwt";
-import addMinutes from "date-fns/addMinutes";
-import { Auth } from "lib/models/auth";
-import isAfter from "date-fns/isAfter";
+import methods from "micro-method-router";
+import * as yup from "yup";
+import { bodySchemaMiddleware } from "lib/middlewares";
+import { generateToken } from "controllers/auth";
 
-export default async function (req: NextApiRequest, res: NextApiResponse) {
-  const email = req.body.email;
-  const code = req.body.code;
-  const auth = await Auth.findByEmailAndCode(email, code);
+let bodySchema = yup
+  .object()
+  .shape({
+    email: yup.string().required(),
+    code: yup.number().required(),
+  })
+  .noUnknown()
+  .strict();
 
-  if (!auth) {
-    res.status(401).send({ message: "email o code incorrect" });
-  }
+async function postHandler(req: NextApiRequest, res: NextApiResponse) {
+  const { email, code } = req.body;
 
-  const validCode = auth.isValidCode();
-  if (validCode) {
-    const token = generate({ userId: auth.data.userId });
+  try {
+    const { token } = await generateToken(email, code);
     res.send({ token });
-  } else {
-    res.status(401).send("El código ingresado expiró");
+  } catch (e) {
+    res.status(400).json({ message: e });
   }
 }
+
+const handler = methods({
+  post: postHandler,
+});
+
+export default bodySchemaMiddleware(bodySchema, handler);

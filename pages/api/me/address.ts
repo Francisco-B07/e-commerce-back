@@ -1,8 +1,26 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import methods from "micro-method-router";
+import * as yup from "yup";
+import { patchMe } from "controllers/users";
+import { authMiddleware, bodySchemaMiddleware } from "lib/middlewares";
 
-export default methods({
-  async patch(req: NextApiRequest, res: NextApiResponse) {
-    res.status(200).send("ok");
-  },
+let bodySchema = yup
+  .object()
+  .shape({
+    address: yup.string(),
+  })
+  .noUnknown()
+  .strict();
+
+async function patchHandler(req: NextApiRequest, res: NextApiResponse, token) {
+  await patchMe(token, req.body);
+  res.send({ message: "Dirección actualizada con éxito" });
+}
+
+const handler = methods({
+  patch: patchHandler,
 });
+
+const auth = authMiddleware(handler);
+
+export default bodySchemaMiddleware(bodySchema, auth);

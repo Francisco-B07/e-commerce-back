@@ -1,22 +1,38 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-
-import { User } from "lib/models/user";
 import { authMiddleware } from "lib/middlewares";
-// import methods from "micro-method-router";
+import methods from "micro-method-router";
+import { getMe, patchMe } from "controllers/users";
+import * as yup from "yup";
 
-// export default methods({
-//   async get(req: NextApiRequest, res: NextApiResponse) {
-//     res.status(200).send("ok");
-//   },
-//   async patch(req: NextApiRequest, res: NextApiResponse) {
-//     res.status(200).send("ok");
-//   },
-// });
+let bodySchema = yup
+  .object()
+  .shape({
+    email: yup.string(),
+    name: yup.string(),
+    address: yup.string(),
+  })
+  .noUnknown()
+  .strict();
 
-async function handler(req: NextApiRequest, res: NextApiResponse, token) {
-  const user = new User(token.userId);
-  await user.pull();
-  res.send(user.data);
+async function getHandler(req: NextApiRequest, res: NextApiResponse, token) {
+  const userData = await getMe(token);
+
+  res.send(userData);
 }
+
+async function patchHandler(req: NextApiRequest, res: NextApiResponse, token) {
+  try {
+    await bodySchema.validate(req.body);
+    await patchMe(token, req.body);
+    res.send({ message: "Usuario actualizado con éxito" });
+  } catch (e) {
+    res.status(400).json({ field: "body", message: e });
+  }
+}
+
+const handler = methods({
+  get: getHandler,
+  patch: patchHandler,
+});
 
 export default authMiddleware(handler);

@@ -13,9 +13,10 @@ export class Auth extends Model {
   isValidCode() {
     const now = new Date();
     const expires = this.data.expires.toDate();
+    const codeUsed = this.data.codeUsed;
 
     // Pregunto si la fecha en la que expira el código es después de la fecha actual
-    const validCode = isAfter(expires, now);
+    const validCode = isAfter(expires, now) && !codeUsed;
 
     return validCode;
   }

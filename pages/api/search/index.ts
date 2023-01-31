@@ -1,8 +1,30 @@
-import type { NextApiRequest, NextApiResponse } from "next";
+import { NextApiRequest, NextApiResponse } from "next";
+import { getOffsetAndLimitFromReq } from "lib/requests";
+import { searchProductByQuery } from "controllers/products";
 import methods from "micro-method-router";
+import * as yup from "yup";
+import { querySchemaMiddleware } from "lib/middlewares";
 
-export default methods({
-  async get(req: NextApiRequest, res: NextApiResponse) {
-    res.status(200).send("ok");
-  },
+let querySchema = yup
+  .object()
+  .shape({
+    limit: yup.string(),
+    offset: yup.string(),
+    q: yup.string(),
+  })
+  .noUnknown()
+  .strict();
+
+async function getHandler(req: NextApiRequest, res: NextApiResponse) {
+  const { offset, limit } = getOffsetAndLimitFromReq(req);
+  const { q } = req.query;
+  const responseAPI = await searchProductByQuery(offset, limit, q);
+
+  res.send(responseAPI);
+}
+
+const handler = methods({
+  get: getHandler,
 });
+
+export default querySchemaMiddleware(querySchema, handler);

@@ -1,16 +1,24 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import methods from "micro-method-router";
-import { sendCode } from "lib/controllers/auth";
+import { sendCode } from "controllers/auth";
+import * as yup from "yup";
+import { bodySchemaMiddleware } from "lib/middlewares";
 
-export default methods({
-  async post(req: NextApiRequest, res: NextApiResponse) {
-    const results = await post(req, res);
-    res.status(200).send({ results });
-  },
+let bodySchema = yup
+  .object()
+  .shape({
+    email: yup.string().required(),
+  })
+  .noUnknown()
+  .strict();
+
+async function postHandler(req: NextApiRequest, res: NextApiResponse) {
+  const results = await sendCode(req.body.email);
+  res.status(200).send({ results });
+}
+
+const handler = methods({
+  post: postHandler,
 });
 
-async function post(req, res) {
-  const results = await sendCode(req.body.email);
-
-  return results;
-}
+export default bodySchemaMiddleware(bodySchema, handler);

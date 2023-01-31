@@ -15,4 +15,9 @@ export class User extends Model {
     newUser.data = data;
     return newUser;
   }
+  static async updateUser(userId, data) {
+    const documentRef = collection.doc(userId);
+
+    await documentRef.update(data);
+  }
 }

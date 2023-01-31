@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { getMerchantOrder } from "lib/mercadopago";
-import { Order } from "lib/models/order";
+import { Order } from "models/order";
 
 export default async function (req: NextApiRequest, res: NextApiResponse) {
   const { id, topic } = req.query;
@@ -11,6 +11,7 @@ export default async function (req: NextApiRequest, res: NextApiResponse) {
       const myOrder = new Order(orderId);
       await myOrder.pull();
       myOrder.data.status = "closed";
+      myOrder.data.externalOrder = order;
       await myOrder.push();
       //   sendEmail("Tu pago fué confirmado")
       //   sendEmailInterno("Alguien compró algo")

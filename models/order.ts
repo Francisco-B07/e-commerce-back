@@ -13,6 +13,7 @@ export class Order extends Model {
     const newOrderSnap = await collection.add(newOrderData);
     const newOrder = new Order(newOrderSnap.id);
     newOrder.data = newOrderData;
+    newOrder.data.createdAt = new Date();
     return newOrder;
   }
 }
