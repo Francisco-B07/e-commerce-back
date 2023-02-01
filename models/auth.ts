@@ -17,11 +17,9 @@ export class Auth extends Model {
 
     // Pregunto si la fecha en la que expira el código es después de la fecha actual
     const validCode = isAfter(expires, now) && !codeUsed;
-
     return validCode;
   }
 
-  //   Este metodo estatico genera una instancia de Auth
   static async findByEmail(email: string) {
     const cleanEmail = this.cleanEmail(email);
     const results = await collection.where("email", "==", cleanEmail).get();
@@ -34,15 +32,18 @@ export class Auth extends Model {
       return null;
     }
   }
+
   static async createNewAuth(data) {
     const newAuthSnap = await collection.add(data);
     const newAuth = new Auth(newAuthSnap.id);
     newAuth.data = data;
     return newAuth;
   }
+
   static cleanEmail(email: string) {
     return email.trim().toLowerCase();
   }
+
   static async findByEmailAndCode(email: string, code: number) {
     const cleanEmail = this.cleanEmail(email);
     const result = await collection

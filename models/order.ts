@@ -16,6 +16,7 @@ export class Order extends Model {
     newOrder.data.createdAt = new Date();
     return newOrder;
   }
+
   static async findOfUser(userId: string) {
     const results = await collection.where("userId", "==", userId).get();
     const orders = [];
@@ -29,6 +30,7 @@ export class Order extends Model {
       return null;
     }
   }
+
   static async findById(orderId: string) {
     const order = await collection.doc(orderId).get();
     if (order) {

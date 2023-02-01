@@ -15,14 +15,9 @@ export class User extends Model {
     newUser.data = data;
     return newUser;
   }
+
   static async updateUser(userId, data) {
     const documentRef = collection.doc(userId);
-
     await documentRef.update(data);
-  }
-  static async getEmail(userId) {
-    const documentRef = collection.doc(userId);
-    const data = await (await documentRef.get()).data();
-    return data.email;
   }
 }

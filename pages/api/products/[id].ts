@@ -1,6 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { getOffsetAndLimitFromReq } from "lib/requests";
-import { searchProductById, searchProductsByQuery } from "controllers/products";
+import { searchProductById } from "controllers/products";
 import methods from "micro-method-router";
 import * as yup from "yup";
 import { querySchemaMiddleware } from "lib/middlewares";
