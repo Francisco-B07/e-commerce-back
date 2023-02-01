@@ -41,8 +41,7 @@ export async function createOrder(
     ],
 
     back_urls: {
-      success:
-        "https://apx.school/player/dwf/ecommerce-backend/f914b78b-59eb-4799-9b2f-4eb759c4ec1e",
+      success: "https://apx.school",
     },
     external_reference: order.id,
     notification_url:

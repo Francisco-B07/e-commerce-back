@@ -13,18 +13,14 @@ let querySchema = yup
   .noUnknown()
   .strict();
 
-async function postHandler(req: NextApiRequest, res: NextApiResponse, token) {
+export default async function postHandler(
+  req: NextApiRequest,
+  res: NextApiResponse,
+  token
+) {
   const { id, topic } = req.query;
 
   await completeOperation(topic, id, token);
 
   res.send({ message: "Finalizó la operación" });
 }
-
-const handler = methods({
-  post: postHandler,
-});
-
-const auth = authMiddleware(handler);
-
-export default querySchemaMiddleware(querySchema, auth);
