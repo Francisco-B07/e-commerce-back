@@ -21,8 +21,12 @@ async function postHandler(req: NextApiRequest, res: NextApiResponse, token) {
   const { productId } = req.query as any;
 
   try {
-    const { url } = await createOrder(token.userId, productId, req.body);
-    res.send({ url });
+    const { url, orderId } = await createOrder(
+      token.userId,
+      productId,
+      req.body
+    );
+    res.send({ url, orderId });
   } catch (e) {
     res.status(400).json({ message: e });
   }

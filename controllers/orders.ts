@@ -1,15 +1,12 @@
-import { createPreference } from "lib/mercadopago";
+import { createPreference, getMerchantOrder } from "lib/mercadopago";
 import { Order } from "models/order";
+import { searchProductById } from "./products";
+import * as sgMail from "@sendgrid/mail";
+import { User } from "models/user";
 
 type createOrderRes = {
   url: string;
-};
-
-const products = {
-  1234: {
-    title: "termo",
-    price: 1000,
-  },
+  orderId: string;
 };
 
 export async function createOrder(
@@ -17,7 +14,8 @@ export async function createOrder(
   productId: string,
   aditionalInfo
 ): Promise<createOrderRes> {
-  const product = products[productId];
+  const product = (await searchProductById(productId)) as any;
+
   if (!product) {
     throw "el producto no existe";
   }
@@ -33,13 +31,12 @@ export async function createOrder(
   const pref = await createPreference({
     items: [
       {
-        title: product.title,
-        description: "Dummy description",
-        picture_url: "http://www.myapp.com/myimage.jpg",
-        category_id: "car_electronics",
+        title: product.object.name,
+        description: product.object.description,
+        category_id: product.object.type,
         quantity: 1,
         currency_id: "ARS",
-        unit_price: product.price,
+        unit_price: product.object.unitCost,
       },
     ],
 
@@ -49,7 +46,84 @@ export async function createOrder(
     },
     external_reference: order.id,
     notification_url:
-      "https://e-commerce-back-inky.vercel.app/api/webhooks/mercadopago",
+      "https://e-commerce-back-inky.vercel.app/api/ipn/mercadopago",
   });
-  return { url: pref.init_point };
+  return { url: pref.init_point, orderId: order.id };
+}
+
+export async function getOrders(token) {
+  const orders = await Order.findOfUser(token.userId);
+  if (orders) {
+    return orders;
+  } else {
+    throw "Ordenes no encontradas";
+  }
+}
+
+export async function getOrderById(orderId) {
+  const order = await Order.findById(orderId);
+  const data = await order.data();
+
+  if (order) {
+    return data;
+  } else {
+    throw "Orden no encontrada";
+  }
+}
+
+async function sendEmailComprador(email: string) {
+  const msg = {
+    to: email as string,
+    from: "franciscojburgoa@gmail.com",
+    subject: "Compra realizada",
+    text: "Compra realizada",
+    html: `
+      <p>Tu pago fué confirmado</p>
+      `,
+  };
+
+  try {
+    await sgMail.send(msg);
+    console.log("enviado");
+  } catch (err) {
+    console.log(err.code, err.message);
+  }
+}
+async function sendEmailVendedor(email: string) {
+  const msg = {
+    to: "franciscojburgoa@gmail.com",
+    from: "franciscojburgoa@gmail.com",
+    subject: "Alguien realizo una compra",
+    text: "Alguien realizo una compra",
+    html: `
+      <p>El usuario <strong>${email}</strong> realizo una compra</p>
+      `,
+  };
+
+  try {
+    await sgMail.send(msg);
+    console.log("enviado");
+  } catch (err) {
+    console.log(err.code, err.message);
+  }
+}
+
+export async function completeOperation(topic, id, token) {
+  const userId = token.userId;
+  const email = await User.getEmail(userId);
+  console.log(email);
+
+  if (topic == "merchant_order") {
+    const order = await getMerchantOrder(id);
+    if (order.order_status == "paid") {
+      const orderId = order.external_reference;
+      const myOrder = new Order(orderId);
+      await myOrder.pull();
+      myOrder.data.status = "closed";
+      myOrder.data.externalOrder = order;
+      await myOrder.push();
+      await sendEmailComprador(email);
+      await sendEmailVendedor(email);
+    }
+  }
 }

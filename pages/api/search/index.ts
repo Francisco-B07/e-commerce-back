@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { getOffsetAndLimitFromReq } from "lib/requests";
-import { searchProductByQuery } from "controllers/products";
+import { searchProductsByQuery } from "controllers/products";
 import methods from "micro-method-router";
 import * as yup from "yup";
 import { querySchemaMiddleware } from "lib/middlewares";
@@ -18,7 +18,7 @@ let querySchema = yup
 async function getHandler(req: NextApiRequest, res: NextApiResponse) {
   const { offset, limit } = getOffsetAndLimitFromReq(req);
   const { q } = req.query;
-  const responseAPI = await searchProductByQuery(offset, limit, q);
+  const responseAPI = await searchProductsByQuery(offset, limit, q);
 
   res.send(responseAPI);
 }

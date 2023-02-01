@@ -1,6 +1,6 @@
 import { productsIndex } from "lib/algolia";
 
-export async function searchProductByQuery(offset, limit, q) {
+export async function searchProductsByQuery(offset, limit, q) {
   const results = await productsIndex.search(q as string, {
     offset: offset,
     length: limit,
@@ -25,4 +25,16 @@ export async function searchProductByQuery(offset, limit, q) {
     },
   };
   return responseAPI;
+}
+
+export async function searchProductById(objectID) {
+  const product = await productsIndex.findObject(
+    (hit) => hit.objectID == objectID
+  );
+
+  if (product) {
+    return product;
+  } else {
+    throw "Producto no encontrado";
+  }
 }

@@ -20,4 +20,9 @@ export class User extends Model {
 
     await documentRef.update(data);
   }
+  static async getEmail(userId) {
+    const documentRef = collection.doc(userId);
+    const data = await (await documentRef.get()).data();
+    return data.email;
+  }
 }
