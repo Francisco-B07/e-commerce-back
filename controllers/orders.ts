@@ -70,32 +70,32 @@ export async function getOrderById(orderId) {
   }
 }
 
-async function sendEmailComprador(email: string) {
-  const msg = {
-    to: email as string,
-    from: "franciscojburgoa@gmail.com",
-    subject: "Compra realizada",
-    text: "Compra realizada",
-    html: `
-      <p>Tu pago fué confirmado</p>
-      `,
-  };
+// async function sendEmailComprador(email: string) {
+//   const msg = {
+//     to: email as string,
+//     from: "franciscojburgoa@gmail.com",
+//     subject: "Compra realizada",
+//     text: "Compra realizada",
+//     html: `
+//       <p>Tu pago fué confirmado</p>
+//       `,
+//   };
 
-  try {
-    await sgMail.send(msg);
-    console.log("enviado");
-  } catch (err) {
-    console.log(err.code, err.message);
-  }
-}
-async function sendEmailVendedor(email: string) {
+//   try {
+//     await sgMail.send(msg);
+//     console.log("enviado");
+//   } catch (err) {
+//     console.log(err.code, err.message);
+//   }
+// }
+async function sendEmailVendedor() {
   const msg = {
     to: "franciscojburgoa@gmail.com",
     from: "franciscojburgoa@gmail.com",
-    subject: "Alguien realizo una compra",
-    text: "Alguien realizo una compra",
+    subject: "Un usuario realizo una compra",
+    text: "Un usuario realizo una compra",
     html: `
-      <p>El usuario <strong>${email}</strong> realizo una compra</p>
+      <p>Un usuario realizo una compra</p>
       `,
   };
 
@@ -107,13 +107,11 @@ async function sendEmailVendedor(email: string) {
   }
 }
 
-export async function completeOperation(topic, id, token) {
-  const userId = token.userId;
-  const email = await User.getEmail(userId);
-  console.log(email);
-
+export async function completeOperation(topic, id) {
   if (topic == "merchant_order") {
     const order = await getMerchantOrder(id);
+    console.log({ order });
+
     if (order.order_status == "paid") {
       const orderId = order.external_reference;
       const myOrder = new Order(orderId);
@@ -121,8 +119,8 @@ export async function completeOperation(topic, id, token) {
       myOrder.data.status = "closed";
       myOrder.data.externalOrder = order;
       await myOrder.push();
-      await sendEmailComprador(email);
-      await sendEmailVendedor(email);
+      // await sendEmailComprador();
+      await sendEmailVendedor();
     }
   }
 }
