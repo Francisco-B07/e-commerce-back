@@ -2,7 +2,8 @@ import { createPreference, getMerchantOrder } from "lib/mercadopago";
 import { Order } from "models/order";
 import { searchProductById } from "./products";
 import * as sgMail from "@sendgrid/mail";
-import { User } from "models/user";
+
+sgMail.setApiKey(process.env.SENDGRID_KEY);
 
 type createOrderRes = {
   url: string;
@@ -70,24 +71,23 @@ export async function getOrderById(orderId) {
   }
 }
 
-// async function sendEmailComprador(email: string) {
-//   const msg = {
-//     to: email as string,
-//     from: "franciscojburgoa@gmail.com",
-//     subject: "Compra realizada",
-//     text: "Compra realizada",
-//     html: `
-//       <p>Tu pago fué confirmado</p>
-//       `,
-//   };
+async function sendEmailComprador(email: string) {
+  const msg = {
+    to: email as string,
+    from: "franciscojburgoa@gmail.com",
+    subject: "Compra realizada",
+    text: "Compra realizada",
+    html: `
+      <p>Tu pago fué confirmado</p>
+      `,
+  };
 
-//   try {
-//     await sgMail.send(msg);
-//     console.log("enviado");
-//   } catch (err) {
-//     console.log(err.code, err.message);
-//   }
-// }
+  try {
+    await sgMail.send(msg);
+  } catch (err) {
+    console.error(err.code, err.message);
+  }
+}
 async function sendEmailVendedor() {
   const msg = {
     to: "franciscojburgoa@gmail.com",
@@ -101,16 +101,14 @@ async function sendEmailVendedor() {
 
   try {
     await sgMail.send(msg);
-    console.log("enviado");
   } catch (err) {
-    console.log(err.code, err.message);
+    console.error(err.code, err.message);
   }
 }
 
 export async function completeOperation(topic, id) {
   if (topic == "merchant_order") {
     const order = await getMerchantOrder(id);
-    console.log({ order });
 
     if (order.order_status == "paid") {
       const orderId = order.external_reference;
@@ -119,7 +117,7 @@ export async function completeOperation(topic, id) {
       myOrder.data.status = "closed";
       myOrder.data.externalOrder = order;
       await myOrder.push();
-      // await sendEmailComprador();
+      // await sendEmailComprador(order.collector.email);
       await sendEmailVendedor();
     }
   }
