@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import methods from "micro-method-router";
 import * as yup from "yup";
-import { bodySchemaMiddleware } from "lib/middlewares";
+import { bodySchemaMiddleware, handlerCORS } from "lib/middlewares";
 import { generateToken } from "controllers/auth";
 
 let bodySchema = yup
@@ -28,4 +28,6 @@ const handler = methods({
   post: postHandler,
 });
 
-export default bodySchemaMiddleware(bodySchema, handler);
+const schemaMiddleware = bodySchemaMiddleware(bodySchema, handler);
+
+export default handlerCORS(schemaMiddleware);

@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { authMiddleware } from "lib/middlewares";
+import { authMiddleware, handlerCORS } from "lib/middlewares";
 import methods from "micro-method-router";
 import { getMe, patchMe } from "controllers/users";
 import * as yup from "yup";
@@ -35,4 +35,6 @@ const handler = methods({
   patch: patchHandler,
 });
 
-export default authMiddleware(handler);
+const auth = authMiddleware(handler);
+
+export default handlerCORS(auth);

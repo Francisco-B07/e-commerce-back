@@ -2,7 +2,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { searchProductById } from "controllers/products";
 import methods from "micro-method-router";
 import * as yup from "yup";
-import { querySchemaMiddleware } from "lib/middlewares";
+import { handlerCORS, querySchemaMiddleware } from "lib/middlewares";
 
 let querySchema = yup
   .object()
@@ -27,4 +27,6 @@ const handler = methods({
   get: getHandler,
 });
 
-export default querySchemaMiddleware(querySchema, handler);
+const querySchemaMidd = querySchemaMiddleware(querySchema, handler);
+
+export default handlerCORS(querySchemaMidd);

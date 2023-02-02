@@ -2,7 +2,11 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import methods from "micro-method-router";
 import * as yup from "yup";
 import { patchMe } from "controllers/users";
-import { authMiddleware, bodySchemaMiddleware } from "lib/middlewares";
+import {
+  authMiddleware,
+  bodySchemaMiddleware,
+  handlerCORS,
+} from "lib/middlewares";
 
 let bodySchema = yup
   .object()
@@ -23,4 +27,6 @@ const handler = methods({
 
 const auth = authMiddleware(handler);
 
-export default bodySchemaMiddleware(bodySchema, auth);
+const schemaMiddleware = bodySchemaMiddleware(bodySchema, auth);
+
+export default handlerCORS(schemaMiddleware);

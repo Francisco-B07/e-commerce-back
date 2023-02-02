@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import methods from "micro-method-router";
-import { authMiddleware, schemaMiddleware } from "lib/middlewares";
+import { authMiddleware, handlerCORS, schemaMiddleware } from "lib/middlewares";
 import { createOrder } from "controllers/orders";
 import * as yup from "yup";
 
@@ -38,4 +38,6 @@ const handler = methods({
 
 const auth = authMiddleware(handler);
 
-export default schemaMiddleware(querySchema, bodySchema, auth);
+const schema = schemaMiddleware(querySchema, bodySchema, auth);
+
+export default handlerCORS(schema);
