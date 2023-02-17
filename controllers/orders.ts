@@ -42,7 +42,8 @@ export async function createOrder(
     ],
 
     back_urls: {
-      success: "https://apx.school",
+      success:
+        "https://e-commerce-front-jmsfc84e4-francisco-b07.vercel.app/thanks",
     },
     external_reference: order.id,
     notification_url:
