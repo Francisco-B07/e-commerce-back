@@ -42,7 +42,7 @@ export async function createOrder(
     ],
 
     back_urls: {
-      success: "https://e-commerce-front-six.vercel.app//thanks",
+      success: "https://e-commerce-front-six.vercel.app/thanks",
     },
     external_reference: order.id,
     notification_url:
